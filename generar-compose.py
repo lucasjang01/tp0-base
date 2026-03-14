@@ -12,6 +12,8 @@ NETWORK_NAME = "testing_net"
 NETWORK_SUBNET = "172.25.125.0/24"
 SERVER_IMAGE = "server:latest"
 CLIENT_IMAGE = "client:latest"
+SERVER_CONFIG_PATH = "./server/config.ini:/config.ini"
+CLIENT_CONFIG_PATH = "./client/config.yaml:/config.yaml"
 
 
 def build_server_service() -> dict:
@@ -21,8 +23,8 @@ def build_server_service() -> dict:
         "entrypoint": "python3 /main.py",
         "environment": [
             "PYTHONUNBUFFERED=1",
-            "LOGGING_LEVEL=DEBUG",
         ],
+        "volumes": [SERVER_CONFIG_PATH],
         "networks": [NETWORK_NAME],
     }
 
@@ -36,6 +38,7 @@ def build_client_service(client_id: int) -> dict:
             f"CLI_ID={client_id}",
             "CLI_LOG_LEVEL=DEBUG",
         ],
+        "volumes": [CLIENT_CONFIG_PATH],
         "networks": [NETWORK_NAME],
         "depends_on": ["server"],
     }

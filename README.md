@@ -75,6 +75,22 @@ client1 exited with code 0
 ## Parte 1: Introducción a Docker
 En esta primera parte del trabajo práctico se plantean una serie de ejercicios que sirven para introducir las herramientas básicas de Docker que se utilizarán a lo largo de la materia. El entendimiento de las mismas será crucial para el desarrollo de los próximos TPs.
 
+#### Cómo ejecutar
+
+Generar el archivo de Docker Compose con N clientes:
+
+```bash
+./generar-compose.sh docker-compose-dev.yaml <N>
+```
+
+Luego iniciar el sistema normalmente:
+
+```bash
+make docker-compose-up
+make docker-compose-logs
+make docker-compose-down
+```
+
 ### Ejercicio N°1:
 Definir un script de bash `generar-compose.sh` que permita crear una definición de Docker Compose con una cantidad configurable de clientes.  El nombre de los containers deberá seguir el formato propuesto: client1, client2, client3, etc. 
 
@@ -93,25 +109,7 @@ python3 mi-generador.py $1 $2
 
 En el archivo de Docker Compose de salida se pueden definir volúmenes, variables de entorno y redes con libertad, pero recordar actualizar este script cuando se modifiquen tales definiciones en los sucesivos ejercicios.
 
-## Resolución
-
-#### Cómo ejecutar
-
-Generar el archivo de Docker Compose con N clientes:
-
-```bash
-./generar-compose.sh docker-compose-dev.yaml <N>
-```
-
-Luego iniciar el sistema normalmente:
-
-```bash
-make docker-compose-up
-make docker-compose-logs
-make docker-compose-down
-```
-
-#### Implementación
+### Resolución
 
 Se creó el script `generar-compose.sh` en la raíz del proyecto. Este script valida los parámetros de entrada y en caso de que este todo bien llama al script `generar-compose.py`, que se encarga de la generación del archivo YAML.
 
@@ -120,6 +118,17 @@ El generador arma el compose como un diccionario en memoria, manteniendo separad
 
 ### Ejercicio N°2:
 Modificar el cliente y el servidor para lograr que realizar cambios en el archivo de configuración no requiera reconstruír las imágenes de Docker para que los mismos sean efectivos. La configuración a través del archivo correspondiente (`config.ini` y `config.yaml`, dependiendo de la aplicación) debe ser inyectada en el container y persistida por fuera de la imagen (hint: `docker volumes`).
+
+#### Resolución
+
+Se eliminó la linea `COPY ./client/config.yaml /config.yaml` del `client/Dockerfile`, por lo que la imagen del cliente ya no incluye el archivo de configuración.
+
+Ahora, tanto el servidor como el cliente reciben el archivo de configuración de un volumen montado en tiempo de ejecución. El generador `generar-compose.py` fue actualizado para agregar la sección `volumes` en cada servicio:
+
+- Servidor: `./server/config.ini:/config.ini`
+- Cada cliente: `./client/config.yaml:/config.yaml`
+
+Esto permite modificar `config.ini` o `config.yaml` en el host y que los cambios se apliquen al reiniciar los containers sin necesidad de rebuildear las imágenes.
 
 
 ### Ejercicio N°3:

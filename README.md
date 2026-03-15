@@ -138,6 +138,9 @@ En caso de que la validación sea exitosa imprimir: `action: test_echo_server | 
 
 El script deberá ubicarse en la raíz del proyecto. Netcat no debe ser instalado en la máquina _host_ y no se pueden exponer puertos del servidor para realizar la comunicación (hint: `docker network`). `
 
+#### Resolución
+
+Se creó el script `validar-echo-server.sh` que se usa `docker network` levantando un contenedor temporal con `--network tp0_testing_net`, conectandolo a la misma red interna que el servidor. Dentro de esa red, Docker resuelve el nombre `server` como hostname del contenedor del servidor, por lo que se puede conectar directamente a `server:12345` sin exponer ningún puerto al host. El contenedor corre `nc` (incluido en `busybox` y sin instalarlo en la máquina host) para enviar un mensaje y comparar la respuesta. Si coinciden imprime `success`, si no `fail`.
 
 ### Ejercicio N°4:
 Modificar servidor y cliente para que ambos sistemas terminen de forma _graceful_ al recibir la signal SIGTERM. Terminar la aplicación de forma _graceful_ implica que todos los _file descriptors_ (entre los que se encuentran archivos, sockets, threads y procesos) deben cerrarse correctamente antes que el thread de la aplicación principal muera. Loguear mensajes en el cierre de cada recurso (hint: Verificar que hace el flag `-t` utilizado en el comando `docker compose down`).

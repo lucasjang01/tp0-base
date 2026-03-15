@@ -36,7 +36,6 @@ def build_client_service(client_id: int) -> dict:
         "entrypoint": "/client",
         "environment": [
             f"CLI_ID={client_id}",
-            "CLI_LOG_LEVEL=DEBUG",
         ],
         "volumes": [CLIENT_CONFIG_PATH],
         "networks": [NETWORK_NAME],

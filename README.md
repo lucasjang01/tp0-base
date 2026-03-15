@@ -145,6 +145,12 @@ Se creó el script `validar-echo-server.sh` que se usa `docker network` levantan
 ### Ejercicio N°4:
 Modificar servidor y cliente para que ambos sistemas terminen de forma _graceful_ al recibir la signal SIGTERM. Terminar la aplicación de forma _graceful_ implica que todos los _file descriptors_ (entre los que se encuentran archivos, sockets, threads y procesos) deben cerrarse correctamente antes que el thread de la aplicación principal muera. Loguear mensajes en el cierre de cada recurso (hint: Verificar que hace el flag `-t` utilizado en el comando `docker compose down`).
 
+#### Resolución
+
+**Servidor (Python):** Se creó un handler para `SIGTERM` con `signal.signal`. Al recibirlo, el handler marca `_running = False` y cierra el socket del servidor. El `accept()` bloqueante lanza un `OSError` al cerrarse el socket, que el loop captura y chequea si `_running = False`, eso significa que llegó un `SIGTERM`, por lo que salimos limpiamente.
+
+**Cliente (Go):** Se registró un canal con `signal.Notify(sigChan, syscall.SIGTERM)`. Al inicio de cada iteración del loop se hace un `select` non-blocking sobre ese canal: si llegó SIGTERM, se loguea y se retorna. La conexión activa ya se cierra con `c.conn.Close()` al final de cada iteración y la señal se escucha al inicio de cada iteración, por lo que no hay recursos abiertos al salir.
+
 ## Parte 2: Repaso de Comunicaciones
 
 Las secciones de repaso del trabajo práctico plantean un caso de uso denominado **Lotería Nacional**. Para la resolución de las mismas deberá utilizarse como base el código fuente provisto en la primera parte, con las modificaciones agregadas en el ejercicio 4.

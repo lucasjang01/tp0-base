@@ -139,7 +139,7 @@ def main():
     output_file = sys.argv[1]
     try:
         num_clients = int(sys.argv[2])
-        if num_clients < 1:
+        if num_clients < 0:
             raise ValueError
     except ValueError:
         print("Error: num_clients must be a positive integer")

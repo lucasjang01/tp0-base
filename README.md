@@ -177,6 +177,18 @@ Se deberá implementar un módulo de comunicación entre el cliente y el servido
 * Correcto empleo de sockets, incluyendo manejo de errores y evitando los fenómenos conocidos como [_short read y short write_](https://cs61.seas.harvard.edu/site/2018/FileDescriptors/).
 
 
+#### Resolución
+
+Para este ejercicio reescribi el cliente en Python por comodidad (dejando el anterior en Go por las dudas).
+
+**Protocolo:** cada mensaje se envía como `[4 bytes: longitud del payload, big-endian] [N bytes: payload]`. El receptor primero lee el header de exactamente 4 bytes para saber la longitud del payload, luego lee exactamente esa cantidad de bytes. El servidor responde con el mismo framing y el payload `"OK"` como confirmación.
+
+**Serialización:** el payload es un CSV por lo facil que es, construido manualmente: `agency,nombre,apellido,documento,nacimiento,numero`. Los campos se unen con `","` y se reconstruyen con `split(",")` en el servidor.
+
+**Separación de responsabilidades:** el módulo `client/common/protocol.py` (y su equivalente en el servidor `server/common/protocol.py`) encapsula todo lo relacionado con el socket: framing, loops de envío y recepción. El cliente (`client.py`) y el servidor (`server.py`) solo construyen el string de apuesta y llaman a `send_message`/`recv_message` sin conocer nada de bytes ni de longitudes.
+
+**Short-read y short-write:** `send_message` llama a `send_all`, un loop que itera sobre `sock.send()` avanzando el offset hasta enviar todos los bytes. `recv_message` llama a `recv_all`, un loop que itera sobre `sock.recv(pendientes)` acumulando hasta completar exactamente la cantidad declarada en el header. Esto garantiza que un envío o recepción parcial no corrompe ni trunca el mensaje.
+
 ### Ejercicio N°6:
 Modificar los clientes para que envíen varias apuestas a la vez (modalidad conocida como procesamiento por _chunks_ o _batchs_). 
 Los _batchs_ permiten que el cliente registre varias apuestas en una misma consulta, acortando tiempos de transmisión y procesamiento.

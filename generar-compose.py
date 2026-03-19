@@ -33,7 +33,7 @@ def build_client_service(client_id: int) -> dict:
     return {
         "container_name": f"client{client_id}",
         "image": CLIENT_IMAGE,
-        "entrypoint": "/client",
+        "entrypoint": "python3 /client_app/main.py",
         "environment": [
             f"CLI_ID={client_id}",
             "CLI_LOG_LEVEL=DEBUG",

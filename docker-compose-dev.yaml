@@ -13,15 +13,15 @@ services:
   client1:
     container_name: client1
     image: client:latest
+    entrypoint: python3 /client_app/main.py
     environment:
-      - PYTHONUNBUFFERED=1
       - CLI_ID=1
       - CLI_LOG_LEVEL=DEBUG
-      - CLI_BET_NOMBRE=Santiago Lionel
-      - CLI_BET_APELLIDO=Lorca
-      - CLI_BET_DOCUMENTO=30904465
-      - CLI_BET_NACIMIENTO=1999-03-17
-      - CLI_BET_NUMERO=7574
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - ./.data/agency-1.env
+    volumes:
+      - ./client/config.yaml:/config.yaml
     networks:
       - testing_net
     depends_on:
@@ -29,63 +29,15 @@ services:
   client2:
     container_name: client2
     image: client:latest
+    entrypoint: python3 /client_app/main.py
     environment:
-      - PYTHONUNBUFFERED=1
       - CLI_ID=2
       - CLI_LOG_LEVEL=DEBUG
-      - CLI_BET_NOMBRE=Ana María
-      - CLI_BET_APELLIDO=González
-      - CLI_BET_DOCUMENTO=28751234
-      - CLI_BET_NACIMIENTO=1985-06-22
-      - CLI_BET_NUMERO=1234
-    networks:
-      - testing_net
-    depends_on:
-      - server
-  client3:
-    container_name: client3
-    image: client:latest
-    environment:
       - PYTHONUNBUFFERED=1
-      - CLI_ID=3
-      - CLI_LOG_LEVEL=DEBUG
-      - CLI_BET_NOMBRE=Carlos Eduardo
-      - CLI_BET_APELLIDO=Martínez
-      - CLI_BET_DOCUMENTO=35612890
-      - CLI_BET_NACIMIENTO=2001-11-05
-      - CLI_BET_NUMERO=4321
-    networks:
-      - testing_net
-    depends_on:
-      - server
-  client4:
-    container_name: client4
-    image: client:latest
-    environment:
-      - PYTHONUNBUFFERED=1
-      - CLI_ID=4
-      - CLI_LOG_LEVEL=DEBUG
-      - CLI_BET_NOMBRE=Laura Beatriz
-      - CLI_BET_APELLIDO=Fernández
-      - CLI_BET_DOCUMENTO=32109876
-      - CLI_BET_NACIMIENTO=1993-08-14
-      - CLI_BET_NUMERO=9999
-    networks:
-      - testing_net
-    depends_on:
-      - server
-  client5:
-    container_name: client5
-    image: client:latest
-    environment:
-      - PYTHONUNBUFFERED=1
-      - CLI_ID=5
-      - CLI_LOG_LEVEL=DEBUG
-      - CLI_BET_NOMBRE=Roberto Juan
-      - CLI_BET_APELLIDO=López
-      - CLI_BET_DOCUMENTO=40123456
-      - CLI_BET_NACIMIENTO=2003-02-28
-      - CLI_BET_NUMERO=5555
+    env_file:
+      - ./.data/agency-2.env
+    volumes:
+      - ./client/config.yaml:/config.yaml
     networks:
       - testing_net
     depends_on:

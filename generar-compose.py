@@ -37,7 +37,9 @@ def build_client_service(client_id: int) -> dict:
         "environment": [
             f"CLI_ID={client_id}",
             "CLI_LOG_LEVEL=DEBUG",
+            "PYTHONUNBUFFERED=1",
         ],
+        "env_file": [f"./.data/agency-{client_id}.env"],
         "volumes": [CLIENT_CONFIG_PATH],
         "networks": [NETWORK_NAME],
         "depends_on": ["server"],

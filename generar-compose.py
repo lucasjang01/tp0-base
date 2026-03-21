@@ -16,13 +16,14 @@ SERVER_CONFIG_PATH = "./server/config.ini:/config.ini"
 CLIENT_CONFIG_PATH = "./client/config.yaml:/config.yaml"
 
 
-def build_server_service() -> dict:
+def build_server_service(num_clients: int) -> dict:
     return {
         "container_name": "server",
         "image": SERVER_IMAGE,
         "entrypoint": "python3 /main.py",
         "environment": [
             "PYTHONUNBUFFERED=1",
+            f"SERVER_AGENCIES={num_clients}",
         ],
         "volumes": [SERVER_CONFIG_PATH],
         "networks": [NETWORK_NAME],
@@ -47,7 +48,7 @@ def build_client_service(client_id: int) -> dict:
 
 
 def build_compose(num_clients: int) -> dict:
-    services = {"server": build_server_service()}
+    services = {"server": build_server_service(num_clients)}
     for i in range(1, num_clients + 1):
         services[f"client{i}"] = build_client_service(i)
 

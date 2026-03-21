@@ -12,7 +12,11 @@ def recv_all(sock, length):
 
 
 def recv_message(sock):
-    header = recv_all(sock, 4)
+    header = sock.recv(4)
+    if not header:
+        return None
+    if len(header) < 4:
+        header += recv_all(sock, 4 - len(header))
     length = struct.unpack('!I', header)[0]
     return recv_all(sock, length).decode('utf-8')
 

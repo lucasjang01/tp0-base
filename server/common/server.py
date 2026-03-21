@@ -8,7 +8,6 @@ from common.utils import Bet, store_bets
 
 class Server:
     def __init__(self, port, listen_backlog):
-        # Initialize server socket
         self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._server_socket.bind(('', port))
         self._server_socket.listen(listen_backlog)
@@ -34,13 +33,22 @@ class Server:
 
     def __handle_client_connection(self, client_sock):
         try:
-            msg = recv_message(client_sock)
-            fields = msg.split(',')
-            agency, first_name, last_name, document, birthdate, number = fields
-            bet = Bet(agency, first_name, last_name, document, birthdate, number)
-            store_bets([bet])
-            logging.info(f'action: apuesta_almacenada | result: success | dni: {bet.document} | numero: {bet.number}')
-            send_message(client_sock, "OK")
+            while True:
+                msg = recv_message(client_sock)
+                if not msg:
+                    break
+                rows = msg.strip().split('\n')
+                bets = []
+                try:
+                    for row in rows:
+                        agency, first_name, last_name, document, birthdate, number = row.split(',')
+                        bets.append(Bet(agency, first_name, last_name, document, birthdate, number))
+                    store_bets(bets)
+                    logging.info(f'action: apuesta_recibida | result: success | cantidad: {len(bets)}')
+                    send_message(client_sock, "OK")
+                except Exception as e:
+                    logging.error(f'action: apuesta_recibida | result: fail | cantidad: {len(bets)} | error: {e}')
+                    send_message(client_sock, "ERROR")
         except OSError as e:
             logging.error(f"action: receive_message | result: fail | error: {e}")
         finally:

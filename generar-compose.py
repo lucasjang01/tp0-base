@@ -40,7 +40,7 @@ def build_client_service(client_id: int) -> dict:
             "PYTHONUNBUFFERED=1",
         ],
         "env_file": [f"./.data/agency-{client_id}.env"],
-        "volumes": [CLIENT_CONFIG_PATH],
+        "volumes": [CLIENT_CONFIG_PATH, f"./.data/agency-{client_id}.csv:/data/agency-{client_id}.csv"],
         "networks": [NETWORK_NAME],
         "depends_on": ["server"],
     }

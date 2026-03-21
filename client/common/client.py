@@ -1,3 +1,4 @@
+import csv
 import logging
 import signal
 import socket
@@ -20,25 +21,42 @@ class Client:
     def start_client_loop(self):
         signal.signal(signal.SIGTERM, self.__handle_sigterm)
 
+        agency_id = self._config['id']
+        max_amount = self._config['batch_max_amount']
+        dataset_path = f"/data/agency-{agency_id}.csv"
+
         try:
             self._conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             host, port = self._config['server_address'].split(':')
             self._conn.connect((host, int(port)))
         except OSError as e:
-            logging.critical(f"action: connect | result: fail | client_id: {self._config['id']} | error: {e}")
+            logging.critical(f"action: connect | result: fail | client_id: {agency_id} | error: {e}")
             return
 
         try:
-            bet = self._config['bet']
-            payload = f"{self._config['id']},{bet['nombre']},{bet['apellido']},{bet['documento']},{bet['nacimiento']},{bet['numero']}"
-
-            send_message(self._conn, payload)
-
-            ack = recv_message(self._conn)
-            if ack == "OK":
-                logging.info(f"action: apuesta_enviada | result: success | dni: {bet['documento']} | numero: {bet['numero']}")
+            with open(dataset_path, newline='', encoding='utf-8') as f:
+                reader = csv.reader(f)
+                batch = []
+                for row in reader:
+                    nombre, apellido, documento, nacimiento, numero = row
+                    batch.append(f"{agency_id},{nombre},{apellido},{documento},{nacimiento},{numero}")
+                    if len(batch) == max_amount:
+                        self._send_batch(batch)
+                        batch = []
+                if batch:
+                    self._send_batch(batch)
         except OSError as e:
-            logging.error(f"action: send_message | result: fail | client_id: {self._config['id']} | error: {e}")
+            logging.error(f"action: send_message | result: fail | client_id: {agency_id} | error: {e}")
         finally:
             self._conn.close()
-            logging.info(f"action: close_resource | result: success | resource: connection | client_id: {self._config['id']}")
+            logging.info(f"action: close_resource | result: success | resource: connection | client_id: {agency_id}")
+
+    def _send_batch(self, batch):
+        payload = '\n'.join(batch)
+        send_message(self._conn, payload)
+        ack = recv_message(self._conn)
+        cantidad = len(batch)
+        if ack == "OK":
+            logging.info(f"action: apuesta_enviada | result: success | cantidad: {cantidad}")
+        else:
+            logging.error(f"action: apuesta_enviada | result: fail | cantidad: {cantidad}")

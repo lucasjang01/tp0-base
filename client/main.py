@@ -1,22 +1,20 @@
 import logging
 import os
 import sys
+import yaml
 
 from common.client import Client
 
 
 def init_config():
+    with open('/config.yaml', 'r') as f:
+        yaml_config = yaml.safe_load(f)
+
     return {
         'id': os.environ['CLI_ID'],
         'server_address': os.environ.get('CLI_SERVER_ADDRESS', 'server:12345'),
         'log_level': os.environ.get('CLI_LOG_LEVEL', 'INFO'),
-        'bet': {
-            'nombre': os.environ['CLI_BET_NOMBRE'],
-            'apellido': os.environ['CLI_BET_APELLIDO'],
-            'documento': os.environ['CLI_BET_DOCUMENTO'],
-            'nacimiento': os.environ['CLI_BET_NACIMIENTO'],
-            'numero': os.environ['CLI_BET_NUMERO'],
-        }
+        'batch_max_amount': yaml_config['batch']['maxAmount'],
     }
 
 

@@ -202,6 +202,16 @@ La cantidad máxima de apuestas dentro de cada _batch_ debe ser configurable des
 
 Por su parte, el servidor deberá responder con éxito solamente si todas las apuestas del _batch_ fueron procesadas correctamente.
 
+#### Resolución
+
+Se cambio el cliente para que ya no envie una sola apuesta por conexión sino que lee el archivo `.data/agency-{N}.csv` y manda los registros de a batches. El payload sigue teniendo el mismo formato de antes (CSV), pero ahora son varias filas juntas separadas por `\n`. El protocolo tampoco tuvo ningun cambio, primero se manda la longitud del payload, y luego el payload.
+
+El cliente acumula filas hasta llegar al maximo numero dentro de un batch, numero configurable con `batch.maxAmount` en el client\config.yaml y ahí manda el batch. Cuando termina el archivo, manda el último batch aunque este incompleto. Todo esto pasa en una sola conexión TCP, no abre y cierra el socket por cada batch.
+
+El servidor ahora tiene un loop por cliente: recibe batches hasta que el cliente cierra la conexión. Por cada batch parsea todas las filas, llama a `store_bets` con la lista completa de una sola vez y solo responde `OK` si todas se procesaron correctamente. Si algo falla responde `ERROR`.
+
+El CSV de cada agencia se inyecta como volumen en `/data/agency-{N}.csv` por lo que nunca se copia dentro de la imagen.
+
 ### Ejercicio N°7:
 
 Modificar los clientes para que notifiquen al servidor al finalizar con el envío de todas las apuestas y así proceder con el sorteo.

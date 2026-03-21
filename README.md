@@ -228,6 +228,22 @@ No es correcto realizar un broadcast de todos los ganadores hacia todas las agen
 ## Parte 3: Repaso de Concurrencia
 En este ejercicio es importante considerar los mecanismos de sincronización a utilizar para el correcto funcionamiento de la persistencia.
 
+#### Resolución
+
+**Protocolo:** se agregaron dos tipos de mensaje nuevos sobre el mismo framing de longitud de 4 bytes ya existente, identificados por su contenido:
+
+- Cliente → Servidor: `FIN` el cliente terminó de enviar todas sus apuestas.
+- Cliente → Servidor: `WINNERS <agency_id>` el cliente pide la lista de ganadores de su agencia.
+- Servidor → Cliente: uno o más DNIs separados por `\n` (o vacío si no hay ganadores).
+
+**Concurrencia:** el servidor ahora acepta todas las conexiones en paralelo lanzando un thread por cliente (`threading.Thread`). Esto es necesario porque sin concurrencia el servidor atendería a los clientes de a uno, y como cada cliente bloquea esperando el resultado del sorteo (que requiere que todos hayan terminado), se produciría un deadlock.
+
+**Barrera:** se eligió `threading.Barrier` como mecanismo de sincronización para coordinar el momento del sorteo: ningún thread puede avanzar a responder ganadores hasta que todos los clientes hayan terminado de enviar sus apuestas. Para implementarla se usa `threading.Barrier(N)`, donde N es la cantidad de agencias configurada en `config.ini` como `SERVER_AGENCIES`. Cada thread llama a `barrier.wait()` cuando su cliente envió `FIN`. El último thread en llegar libera a todos simultáneamente. El thread del servidor que recibe índice `0` del `wait()` es el que imprime `action: sorteo | result: success`, evitando que se loguee N veces.
+
+**Lock en `store_bets`:** la función `store_bets` no es thread-safe (abre y escribe en un archivo CSV). Se protege con un lock para que solo un thread escriba a la vez. `load_bets` se llama únicamente después de la barrera, cuando ningún thread está escribiendo, por lo que no necesita lock.
+
+**Ganadores por agencia:** cada thread llama a `load_bets()` y filtra por su propio `agency_id` comparando `bet.agency == agency_id`. De esta forma cada agencia recibe únicamente sus propios ganadores sin broadcast global.
+
 ### Ejercicio N°8:
 
 Modificar el servidor para que permita aceptar conexiones y procesar mensajes en paralelo. En caso de que el alumno implemente el servidor en Python utilizando _multithreading_,  deberán tenerse en cuenta las [limitaciones propias del lenguaje](https://wiki.python.org/moin/GlobalInterpreterLock).

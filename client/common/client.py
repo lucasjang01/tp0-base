@@ -34,22 +34,36 @@ class Client:
             return
 
         try:
-            with open(dataset_path, newline='', encoding='utf-8') as f:
-                reader = csv.reader(f)
-                batch = []
-                for row in reader:
-                    nombre, apellido, documento, nacimiento, numero = row
-                    batch.append(f"{agency_id},{nombre},{apellido},{documento},{nacimiento},{numero}")
-                    if len(batch) == max_amount:
-                        self._send_batch(batch)
-                        batch = []
-                if batch:
-                    self._send_batch(batch)
+            self._send_all_bets(agency_id, max_amount, dataset_path)
+            send_message(self._conn, "FIN")
+            self._query_winners(agency_id)
         except OSError as e:
             logging.error(f"action: send_message | result: fail | client_id: {agency_id} | error: {e}")
         finally:
             self._conn.close()
             logging.info(f"action: close_resource | result: success | resource: connection | client_id: {agency_id}")
+
+    def _send_all_bets(self, agency_id, max_amount, dataset_path):
+        with open(dataset_path, newline='', encoding='utf-8') as f:
+            reader = csv.reader(f)
+            batch = []
+            for row in reader:
+                nombre, apellido, documento, nacimiento, numero = row
+                batch.append(f"{agency_id},{nombre},{apellido},{documento},{nacimiento},{numero}")
+                if len(batch) == max_amount:
+                    self._send_batch(batch)
+                    batch = []
+            if batch:
+                self._send_batch(batch)
+
+    def _query_winners(self, agency_id):
+        send_message(self._conn, f"WINNERS {agency_id}")
+        response = recv_message(self._conn)
+        if response is None:
+            logging.error(f"action: consulta_ganadores | result: fail | error: connection closed")
+            return
+        winners = [dni for dni in response.split('\n') if dni]
+        logging.info(f"action: consulta_ganadores | result: success | cant_ganadores: {len(winners)}")
 
     def _send_batch(self, batch):
         payload = '\n'.join(batch)

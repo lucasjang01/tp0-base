@@ -71,6 +71,21 @@ client1  | 2024-08-21 22:11:40 INFO     action: loop_finished | result: success 
 client1 exited with code 0
 ```
 
+#### Cómo ejecutar
+
+Generar el archivo de Docker Compose con N clientes:
+
+```bash
+./generar-compose.sh docker-compose-dev.yaml <N>
+```
+
+Luego iniciar el sistema normalmente:
+
+```bash
+make docker-compose-up
+make docker-compose-logs
+make docker-compose-down
+```
 
 ## Parte 1: Introducción a Docker
 En esta primera parte del trabajo práctico se plantean una serie de ejercicios que sirven para introducir las herramientas básicas de Docker que se utilizarán a lo largo de la materia. El entendimiento de las mismas será crucial para el desarrollo de los próximos TPs.
@@ -109,12 +124,11 @@ python3 mi-generador.py $1 $2
 
 En el archivo de Docker Compose de salida se pueden definir volúmenes, variables de entorno y redes con libertad, pero recordar actualizar este script cuando se modifiquen tales definiciones en los sucesivos ejercicios.
 
-### Resolución
+#### Resolución
 
 Se creó el script `generar-compose.sh` en la raíz del proyecto. Este script valida los parámetros de entrada y en caso de que este todo bien llama al script `generar-compose.py`, que se encarga de la generación del archivo YAML.
 
 El generador arma el compose como un diccionario en memoria, manteniendo separadas las funciones que construyen cada servicio (`build_server_service`, `build_client_service`) de la que escribe el YAML (`write_compose`). Así no hay que repetir valores como la imagen, la red o la subnet cada vez, y si en ejercicios futuros hay que cambiar algo, alcanza con cambiar esas funciones de construcción.
-
 
 ### Ejercicio N°2:
 Modificar el cliente y el servidor para lograr que realizar cambios en el archivo de configuración no requiera reconstruír las imágenes de Docker para que los mismos sean efectivos. La configuración a través del archivo correspondiente (`config.ini` y `config.yaml`, dependiendo de la aplicación) debe ser inyectada en el container y persistida por fuera de la imagen (hint: `docker volumes`).

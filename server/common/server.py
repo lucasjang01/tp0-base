@@ -19,7 +19,6 @@ class Server:
         self._running = True
         signal.signal(signal.SIGTERM, self.__handle_sigterm)
 
-        # Barrier and Lock must come from multiprocessing to work across processes
         self._lottery_barrier = multiprocessing.Barrier(agencies)
         self._store_lock = multiprocessing.Lock()
 
@@ -51,6 +50,12 @@ class Server:
 
         for p in processes:
             p.join()
+
+    def __accept_new_connection(self):
+        logging.info('action: accept_connections | result: in_progress')
+        c, addr = self._server_socket.accept()
+        logging.info(f'action: accept_connections | result: success | ip: {addr[0]}')
+        return c
 
 
 def _handle_client_connection(fd, lottery_barrier, store_lock):

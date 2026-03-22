@@ -90,22 +90,6 @@ make docker-compose-down
 ## Parte 1: Introducción a Docker
 En esta primera parte del trabajo práctico se plantean una serie de ejercicios que sirven para introducir las herramientas básicas de Docker que se utilizarán a lo largo de la materia. El entendimiento de las mismas será crucial para el desarrollo de los próximos TPs.
 
-#### Cómo ejecutar
-
-Generar el archivo de Docker Compose con N clientes:
-
-```bash
-./generar-compose.sh docker-compose-dev.yaml <N>
-```
-
-Luego iniciar el sistema normalmente:
-
-```bash
-make docker-compose-up
-make docker-compose-logs
-make docker-compose-down
-```
-
 ### Ejercicio N°1:
 Definir un script de bash `generar-compose.sh` que permita crear una definición de Docker Compose con una cantidad configurable de clientes.  El nombre de los containers deberá seguir el formato propuesto: client1, client2, client3, etc. 
 

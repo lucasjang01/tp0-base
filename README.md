@@ -71,10 +71,6 @@ client1  | 2024-08-21 22:11:40 INFO     action: loop_finished | result: success 
 client1 exited with code 0
 ```
 
-
-## Parte 1: Introducción a Docker
-En esta primera parte del trabajo práctico se plantean una serie de ejercicios que sirven para introducir las herramientas básicas de Docker que se utilizarán a lo largo de la materia. El entendimiento de las mismas será crucial para el desarrollo de los próximos TPs.
-
 #### Cómo ejecutar
 
 Generar el archivo de Docker Compose con N clientes:
@@ -90,6 +86,9 @@ make docker-compose-up
 make docker-compose-logs
 make docker-compose-down
 ```
+
+## Parte 1: Introducción a Docker
+En esta primera parte del trabajo práctico se plantean una serie de ejercicios que sirven para introducir las herramientas básicas de Docker que se utilizarán a lo largo de la materia. El entendimiento de las mismas será crucial para el desarrollo de los próximos TPs.
 
 ### Ejercicio N°1:
 Definir un script de bash `generar-compose.sh` que permita crear una definición de Docker Compose con una cantidad configurable de clientes.  El nombre de los containers deberá seguir el formato propuesto: client1, client2, client3, etc. 

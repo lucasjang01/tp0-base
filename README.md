@@ -248,6 +248,12 @@ En este ejercicio es importante considerar los mecanismos de sincronización a u
 
 Modificar el servidor para que permita aceptar conexiones y procesar mensajes en paralelo. En caso de que el alumno implemente el servidor en Python utilizando _multithreading_,  deberán tenerse en cuenta las [limitaciones propias del lenguaje](https://wiki.python.org/moin/GlobalInterpreterLock).
 
+#### Resolución
+
+`threading` no era paralelismo real, ya que el GIL de Python no deja que dos thread corran al mismo tiempo. Por lo que se reemplazo `threading` por `multiprocessing` para lograr verdadero paralelismo. El servidor lanza un proceso hijo por cada cliente aceptado. Cada proceso corre en su propio interprete Python con su propio GIL, por lo que pueden ejecutar codigo Python en paralelo real.
+
+**Sincronización entre procesos:** `threading.Barrier` y `threading.Lock` viven en memoria del proceso y no son visibles entre procesos separados. Se reemplazaron por `multiprocessing.Barrier` y `multiprocessing.Lock`, que usan memoria compartida del sistema operativo y funcionan correctamente entre procesos distintos. Se pasan como argumentos a cada proceso hijo junto con el file descriptor.
+
 ## Condiciones de Entrega
 Se espera que los alumnos realicen un _fork_ del presente repositorio para el desarrollo de los ejercicios y que aprovechen el esqueleto provisto tanto (o tan poco) como consideren necesario.
 

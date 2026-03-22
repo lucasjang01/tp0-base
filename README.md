@@ -108,7 +108,7 @@ python3 mi-generador.py $1 $2
 
 En el archivo de Docker Compose de salida se pueden definir volúmenes, variables de entorno y redes con libertad, pero recordar actualizar este script cuando se modifiquen tales definiciones en los sucesivos ejercicios.
 
-## Resolución
+#### Resolución
 
 Se creó el script `generar-compose.sh` en la raíz del proyecto. Este script valida los parámetros de entrada y en caso de que este todo bien llama al script `generar-compose.py`, que se encarga de la generación del archivo YAML.
 
